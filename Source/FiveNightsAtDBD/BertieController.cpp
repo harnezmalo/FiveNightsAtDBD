@@ -3,21 +3,17 @@
 
 #include "BertieController.h"
 #include <Perception/AIPerceptionComponent.h>
+#include "BertieCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "Perception/AISense_Sight.h"
 
 ABertieController::ABertieController(const FObjectInitializer& ObjectInitializer)
 {
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
-	/*static ConstructorHelpers::FObjectFinder<UBehaviorTree> obj(TEXT("/Script/AIModule.BehaviorTree'/Game/Game/Blueprint/Bertie/BT_Bertie.BT_Bertie'"));
-
-	if(obj.Succeeded())
-	{
-		BehaviorTree = obj.Object;
-	}*/
 
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BTComponent"));
@@ -25,8 +21,21 @@ ABertieController::ABertieController(const FObjectInitializer& ObjectInitializer
 
 void ABertieController::OnPerception(AActor* Actor, FAIStimulus Stimulus)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, "Sensed something");
-	SetFocus(Stimulus.WasSuccessfullySensed() ? Actor : nullptr);
+	//SetFocus(Stimulus.WasSuccessfullySensed() ? Actor : nullptr);
+
+	ABertieCharacter* Bertie = Cast<ABertieCharacter>(GetPawn());
+	if (!Bertie)
+		return;
+
+	if(const TSubclassOf<UAISense> SensedClass = UAIPerceptionSystem::GetSenseClassForStimulus(this, Stimulus); SensedClass == UAISense_Sight::StaticClass())
+	{
+		if (Stimulus.WasSuccessfullySensed())
+			Bertie->StartChase();
+		else
+		{
+			Bertie->EndChase();
+		}
+	}
 }
 
 void ABertieController::OnPossess(APawn* InPawn)

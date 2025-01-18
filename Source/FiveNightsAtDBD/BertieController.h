@@ -26,7 +26,6 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = true ))
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 

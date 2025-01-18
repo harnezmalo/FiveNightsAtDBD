@@ -22,17 +22,26 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FBertieEvent OnBertie;
 
-	UPROPERTY(BlueprintAssignable)
-	FBertieHealthEvent OnBertieLoseHealth;
+	UFUNCTION()
+	void StartChase();
 
-	UPROPERTY(BlueprintAssignable)
-	FEventMachin OnMachinHappened;
+	UFUNCTION()
+	void EndChase();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BertieHit"))
-	void BertieHit();
+	UFUNCTION()
+	void CatchPlayer();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BertieHitWithParams"))
-	void BertieHitwithParams(AActor* actor);
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Start Chase"))
+	void OnStartChase();
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On End Chase"))
+	void OnEndChase();
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Catch Player"))
+	void OnCatchPlayer();
+
+	UFUNCTION(BlueprintCallable)
+	bool GetChaseState() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,4 +54,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY()
+	bool bIsChasing;
+
+	UPROPERTY(EditAnywhere)
+	float WanderingSpeed;
+
+	UPROPERTY(EditAnywhere)
+	float ChaseSpeed;
 };
