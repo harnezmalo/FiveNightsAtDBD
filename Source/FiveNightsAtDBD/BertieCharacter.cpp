@@ -3,6 +3,7 @@
 
 #include "BertieCharacter.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -20,6 +21,7 @@ void ABertieCharacter::StartChase()
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, "Started chase");
 #endif
 	GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
+	GetCharacterMovement()->MaxAcceleration = ChaseAcceleration;
 	bIsChasing = true;
 	OnStartChase();
 }
@@ -30,13 +32,17 @@ void ABertieCharacter::EndChase()
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Ended chase");
 #endif
 	GetCharacterMovement()->MaxWalkSpeed = WanderingSpeed;
+	GetCharacterMovement()->MaxAcceleration = WanderingAcceleration;
 	bIsChasing = false;
 	OnEndChase();
 }
 
-void ABertieCharacter::CatchPlayer()
+void ABertieCharacter::CatchPlayer(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!Cast<ACharacter>(OtherActor))
+		return;
 
+	OnCatchPlayer();
 }
 
 bool ABertieCharacter::GetChaseState() const
@@ -48,13 +54,17 @@ bool ABertieCharacter::GetChaseState() const
 void ABertieCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABertieCharacter::CatchPlayer);
 }
 
 // Called every frame
 void ABertieCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (!bIsChasing)
+		return;
 
 }
 
