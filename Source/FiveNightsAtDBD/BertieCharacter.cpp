@@ -20,6 +20,7 @@ void ABertieCharacter::StartChase()
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, "Started chase");
 #endif
 	GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
+	bIsChasing = true;
 	OnStartChase();
 }
 
@@ -29,6 +30,7 @@ void ABertieCharacter::EndChase()
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Ended chase");
 #endif
 	GetCharacterMovement()->MaxWalkSpeed = WanderingSpeed;
+	bIsChasing = false;
 	OnEndChase();
 }
 
