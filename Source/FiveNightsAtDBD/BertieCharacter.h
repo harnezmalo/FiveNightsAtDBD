@@ -62,4 +62,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float ChaseSpeed;
+
+	UPROPERTY(EditAnywhere)
+	float WanderingAcceleration;
+
+	UPROPERTY(EditAnywhere)
+	float ChaseAcceleration;
+
 };
