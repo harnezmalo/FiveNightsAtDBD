@@ -3,6 +3,7 @@
 
 #include "BertieCharacter.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -36,9 +37,12 @@ void ABertieCharacter::EndChase()
 	OnEndChase();
 }
 
-void ABertieCharacter::CatchPlayer()
+void ABertieCharacter::CatchPlayer(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!Cast<ACharacter>(OtherActor))
+		return;
 
+	OnCatchPlayer();
 }
 
 bool ABertieCharacter::GetChaseState() const
@@ -50,7 +54,8 @@ bool ABertieCharacter::GetChaseState() const
 void ABertieCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABertieCharacter::CatchPlayer);
 }
 
 // Called every frame
