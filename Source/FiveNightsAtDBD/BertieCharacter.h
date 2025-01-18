@@ -29,7 +29,7 @@ public:
 	void EndChase();
 
 	UFUNCTION()
-	void CatchPlayer();
+	void CatchPlayer(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Start Chase"))
 	void OnStartChase();
