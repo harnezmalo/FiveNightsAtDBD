@@ -1,34 +1,63 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GregCharacter.h"
+#include "InteractableLocker.h"
+#include "GameFramework/PlayerController.h"
+#include "DrawDebugHelpers.h"
 
-// Sets default values
 AGregCharacter::AGregCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+    PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
 void AGregCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
 }
 
-// Called every frame
 void AGregCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
+    // Check for lockers in range
+    DetectLocker();
 }
 
-// Called to bind functionality to input
 void AGregCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+    // Bind interaction function
+    PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGregCharacter::InteractWithLocker);
 }
 
+void AGregCharacter::InteractWithLocker()
+{
+    if (CurrentLocker)
+    {
+        CurrentLocker->TeleportToLinkedLocker(this);
+    }
+}
+
+void AGregCharacter::DetectLocker()
+{
+    FVector Start = GetActorLocation();
+    FVector ForwardVector = GetActorForwardVector();
+    FVector End = Start + (ForwardVector * InteractionRange);
+
+    FHitResult HitResult;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+
+    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+
+    if (bHit && HitResult.GetActor())
+    {
+        AInteractableLocker* Locker = Cast<AInteractableLocker>(HitResult.GetActor());
+        if (Locker)
+        {
+            CurrentLocker = Locker;
+            return;
+        }
+    }
+
+    CurrentLocker = nullptr;
+}
