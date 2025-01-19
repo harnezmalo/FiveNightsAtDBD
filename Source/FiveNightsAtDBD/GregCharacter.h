@@ -33,6 +33,9 @@ public:
     UFUNCTION(BlueprintImplementableEvent, DisplayName = "On Teleport")
     void OnTeleport();
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TObjectPtr<AActor> FoodHeld;
+
 private:
     // The locker currently in range
     UPROPERTY(VisibleAnywhere, Category = "Interaction")
