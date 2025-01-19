@@ -1,7 +1,8 @@
 #include "GregCharacter.h"
-#include "InteractableLocker.h"
 #include "GameFramework/PlayerController.h"
 #include "DrawDebugHelpers.h"
+#include "InteractibleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AGregCharacter::AGregCharacter()
 {
@@ -18,7 +19,7 @@ void AGregCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     // Check for lockers in range
-    DetectLocker();
+    DetectInteractible();
 }
 
 void AGregCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -26,38 +27,52 @@ void AGregCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     // Bind interaction function
-    PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGregCharacter::InteractWithLocker);
+    PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGregCharacter::Interact);
 }
 
-void AGregCharacter::InteractWithLocker()
+void AGregCharacter::Interact()
 {
-    if (CurrentLocker)
+    if (CurrentInteractable)
     {
-        CurrentLocker->TeleportToLinkedLocker(this);
+        CurrentInteractable->Interact(this);
     }
 }
 
-void AGregCharacter::DetectLocker()
+void AGregCharacter::DetectInteractible()
 {
     FVector Start = GetActorLocation();
-    FVector ForwardVector = GetActorForwardVector();
-    FVector End = Start + (ForwardVector * InteractionRange);
 
-    FHitResult HitResult;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this);
+    TArray<AActor*> actorsHit;
+    TArray<AActor*> actorsToIgnore;
+    actorsToIgnore.Add(this);
+    TArray<TEnumAsByte<EObjectTypeQuery>> objectsFilter;
+    objectsFilter.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+    UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Start, InteractionRange, objectsFilter, nullptr, actorsToIgnore, actorsHit);
 
-    if (bHit && HitResult.GetActor())
+    TArray<AActor*> interactibleActors;
+    for(auto& Actor : actorsHit)
     {
-        AInteractableLocker* Locker = Cast<AInteractableLocker>(HitResult.GetActor());
-        if (Locker)
+        if (Cast<UInteractibleComponent>(Actor->GetComponentByClass(UInteractibleComponent::StaticClass())))
+            interactibleActors.Add(Actor);
+    }
+
+    interactibleActors.Sort([&](const AActor& A, const AActor& B)
+    {
+        float DistanceA = FVector::Dist(this->GetActorLocation(), A.GetActorLocation());
+        float DistanceB = FVector::Dist(this->GetActorLocation(), B.GetActorLocation());
+        return DistanceA < DistanceB;
+    });
+
+    if (interactibleActors.Num() > 0)
+    {
+        UInteractibleComponent* InteractibleComponent = Cast<UInteractibleComponent>(interactibleActors[0]->GetComponentByClass(UInteractibleComponent::StaticClass()));
+        if(InteractibleComponent)
         {
-            CurrentLocker = Locker;
+            CurrentInteractable = InteractibleComponent;
             return;
         }
     }
 
-    CurrentLocker = nullptr;
+    CurrentInteractable = nullptr;
 }

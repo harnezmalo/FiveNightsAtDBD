@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InteractableLocker.h"
 #include "GregCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTeleportEvent);
+class UInputComponent;
+class UInteractibleComponent;
 
 UCLASS()
 class FIVENIGHTSATDBD_API AGregCharacter : public ACharacter
@@ -24,21 +24,23 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     // Called to bind functionality to input
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
     // Interaction function
     UFUNCTION(BlueprintCallable, Category = "Interaction")
-    void InteractWithLocker();
+    void Interact();
 
-    UPROPERTY(BlueprintAssignable)
-    FTeleportEvent OnTeleport;
+    UFUNCTION(BlueprintImplementableEvent, DisplayName = "On Teleport")
+    void OnTeleport();
 
 private:
     // The locker currently in range
-    class AInteractableLocker* CurrentLocker;
+    UPROPERTY(VisibleAnywhere, Category = "Interaction")
+    TObjectPtr<UInteractibleComponent> CurrentInteractable;
 
     // Function to detect lockers
-    void DetectLocker();
+    UFUNCTION()
+    void DetectInteractible();
 
     // Interaction range
     UPROPERTY(EditAnywhere, Category = "Interaction")
