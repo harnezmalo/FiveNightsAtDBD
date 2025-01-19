@@ -46,6 +46,7 @@ void AGregCharacter::DetectInteractible()
     TArray<AActor*> actorsHit;
     TArray<AActor*> actorsToIgnore;
     actorsToIgnore.Add(this);
+
     TArray<TEnumAsByte<EObjectTypeQuery>> objectsFilter;
     objectsFilter.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 
