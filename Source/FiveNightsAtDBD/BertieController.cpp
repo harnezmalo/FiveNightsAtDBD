@@ -17,6 +17,7 @@ ABertieController::ABertieController(const FObjectInitializer& ObjectInitializer
 
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BTComponent"));
+	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABertieController::OnPerception);
 }
 
 void ABertieController::OnPerception(AActor* Actor, FAIStimulus Stimulus)
@@ -42,7 +43,6 @@ void ABertieController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABertieController::OnPerception);
 	if(Blackboard)
 	{
 		Blackboard->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
