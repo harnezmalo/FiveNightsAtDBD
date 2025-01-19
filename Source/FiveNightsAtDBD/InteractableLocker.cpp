@@ -15,11 +15,13 @@ AInteractableLocker::AInteractableLocker()
     RootComponent = BoxComponent;
 
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Locker mesh"));
+    Mesh->SetupAttachment(RootComponent);
     Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     InteractibleComponent = CreateDefaultSubobject<UInteractibleComponent>(TEXT("Interaction Component"));
 
     SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Teleport Location"));
+    SceneComponent->SetupAttachment(RootComponent);
 }
 
 void AInteractableLocker::TeleportToLinkedLocker(ACharacter* Greg)
