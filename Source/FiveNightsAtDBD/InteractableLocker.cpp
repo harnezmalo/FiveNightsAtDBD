@@ -18,13 +18,15 @@ AInteractableLocker::AInteractableLocker()
     Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     InteractibleComponent = CreateDefaultSubobject<UInteractibleComponent>(TEXT("Interaction Component"));
+
+    SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Teleport Location"));
 }
 
 void AInteractableLocker::TeleportToLinkedLocker(ACharacter* Greg)
 {
     if (LinkedLocker && Greg)
     {
-        FVector TargetLocation = LinkedLocker->GetActorLocation();
+        FVector TargetLocation = LinkedLocker->SceneComponent->GetComponentLocation();
         Greg->SetActorLocation(TargetLocation);
         if (AGregCharacter* gchar = Cast<AGregCharacter>(Greg))
             gchar->OnTeleport();

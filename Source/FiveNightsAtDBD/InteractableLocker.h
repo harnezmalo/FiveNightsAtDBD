@@ -28,6 +28,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TObjectPtr<UInteractibleComponent> InteractibleComponent;
 
+    UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+    TObjectPtr<USceneComponent> SceneComponent;
+
 private:
 
     // Linked locker

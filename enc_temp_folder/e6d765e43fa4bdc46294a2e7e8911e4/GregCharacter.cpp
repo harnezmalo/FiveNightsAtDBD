@@ -32,7 +32,6 @@ void AGregCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AGregCharacter::Interact()
 {
-    GEngine->AddOnScreenDebugMessage(-1, 3.0f,FColor::Green, TEXT("searching interact"));
     if (CurrentInteractable)
     {
         CurrentInteractable->Interact(this);
@@ -52,10 +51,6 @@ void AGregCharacter::DetectInteractible()
     UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Start, InteractionRange, objectsFilter, nullptr, actorsToIgnore, actorsHit);
 
     TArray<AActor*> interactibleActors;
-    
-
-    /*GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%i"), actorsHit.Num()));*/
-    
     for(auto& Actor : actorsHit)
     {
         if (Cast<UInteractibleComponent>(Actor->GetComponentByClass(UInteractibleComponent::StaticClass())))
@@ -75,7 +70,6 @@ void AGregCharacter::DetectInteractible()
         if(InteractibleComponent)
         {
             CurrentInteractable = InteractibleComponent;
-            /*GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interragis !!"));*/
             return;
         }
     }
