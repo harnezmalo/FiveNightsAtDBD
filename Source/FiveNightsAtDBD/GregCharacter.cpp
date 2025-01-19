@@ -1,34 +1,78 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GregCharacter.h"
+#include "GameFramework/PlayerController.h"
+#include "DrawDebugHelpers.h"
+#include "InteractibleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
-// Sets default values
 AGregCharacter::AGregCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+    PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
 void AGregCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
 }
 
-// Called every frame
 void AGregCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
+    // Check for lockers in range
+    DetectInteractible();
 }
 
-// Called to bind functionality to input
 void AGregCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+    // Bind interaction function
+    PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGregCharacter::Interact);
 }
 
+void AGregCharacter::Interact()
+{
+    if (CurrentInteractable)
+    {
+        CurrentInteractable->Interact(this);
+    }
+}
+
+void AGregCharacter::DetectInteractible()
+{
+    FVector Start = GetActorLocation();
+
+    TArray<AActor*> actorsHit;
+    TArray<AActor*> actorsToIgnore;
+    actorsToIgnore.Add(this);
+    TArray<TEnumAsByte<EObjectTypeQuery>> objectsFilter;
+    objectsFilter.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+
+    UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Start, InteractionRange, objectsFilter, nullptr, actorsToIgnore, actorsHit);
+
+    TArray<AActor*> interactibleActors;
+    for(auto& Actor : actorsHit)
+    {
+        if (Cast<UInteractibleComponent>(Actor->GetComponentByClass(UInteractibleComponent::StaticClass())))
+            interactibleActors.Add(Actor);
+    }
+
+    interactibleActors.Sort([&](const AActor& A, const AActor& B)
+    {
+        float DistanceA = FVector::Dist(this->GetActorLocation(), A.GetActorLocation());
+        float DistanceB = FVector::Dist(this->GetActorLocation(), B.GetActorLocation());
+        return DistanceA < DistanceB;
+    });
+
+    if (interactibleActors.Num() > 0)
+    {
+        UInteractibleComponent* InteractibleComponent = Cast<UInteractibleComponent>(interactibleActors[0]->GetComponentByClass(UInteractibleComponent::StaticClass()));
+        if(InteractibleComponent)
+        {
+            CurrentInteractable = InteractibleComponent;
+            return;
+        }
+    }
+
+    CurrentInteractable = nullptr;
+}
